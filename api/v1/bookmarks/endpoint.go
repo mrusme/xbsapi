@@ -55,9 +55,10 @@ func Register(
 	endpoint.logger = endpoint.xbsctx.Logger
 
 	bookmarksRouter := (*fiberRouter).Group("/bookmarks")
-	// bookmarksRouter.Get("/", endpoint.List)
+
 	bookmarksRouter.Get("/:id", endpoint.Show)
+	bookmarksRouter.Get("/:id/lastUpdated", endpoint.ShowLastUpdated)
+	bookmarksRouter.Get("/:id/version", endpoint.ShowVersion)
 	bookmarksRouter.Post("/", endpoint.Create)
 	bookmarksRouter.Put("/:id", endpoint.Update)
-	// bookmarksRouter.Delete("/:id", endpoint.Destroy)
 }
