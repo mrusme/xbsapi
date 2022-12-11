@@ -1,0 +1,68 @@
+definitions:
+  bookmarks.BookmarkCreateModel:
+    properties:
+      version:
+        type: string
+    required:
+    - version
+    type: object
+  bookmarks.BookmarkCreateResponse:
+    properties:
+      bookmark:
+        $ref: '#/definitions/bookmarks.BookmarkShowModel'
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  bookmarks.BookmarkShowModel:
+    properties:
+      bookmarks:
+        type: string
+      id:
+        type: string
+      lastUpdated:
+        type: string
+      version:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /bookmarks:
+    post:
+      consumes:
+      - application/json
+      description: Add a new bookmark
+      parameters:
+      - description: Add bookmark
+        in: body
+        name: bookmark
+        required: true
+        schema:
+          $ref: '#/definitions/bookmarks.BookmarkCreateModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkCreateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkCreateResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkCreateResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkCreateResponse'
+      security:
+      - BasicAuth: []
+      summary: Create a bookmark
+      tags:
+      - bookmarks
+swagger: "2.0"

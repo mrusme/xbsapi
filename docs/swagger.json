@@ -1,0 +1,109 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/bookmarks": {
+            "post": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Add a new bookmark",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bookmarks"
+                ],
+                "summary": "Create a bookmark",
+                "parameters": [
+                    {
+                        "description": "Add bookmark",
+                        "name": "bookmark",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/bookmarks.BookmarkCreateModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/bookmarks.BookmarkCreateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bookmarks.BookmarkCreateResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bookmarks.BookmarkCreateResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/bookmarks.BookmarkCreateResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "bookmarks.BookmarkCreateModel": {
+            "type": "object",
+            "required": [
+                "version"
+            ],
+            "properties": {
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "bookmarks.BookmarkCreateResponse": {
+            "type": "object",
+            "properties": {
+                "bookmark": {
+                    "$ref": "#/definitions/bookmarks.BookmarkShowModel"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "bookmarks.BookmarkShowModel": {
+            "type": "object",
+            "properties": {
+                "bookmarks": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastUpdated": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

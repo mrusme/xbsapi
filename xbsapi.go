@@ -12,6 +12,7 @@ import (
 	fiberadapter "github.com/awslabs/aws-lambda-go-api-proxy/fiber"
 	"github.com/mrusme/journalist/middlewares/fiberzap"
 	"github.com/mrusme/xbsapi/api"
+	"github.com/mrusme/xbsapi/ent"
 	"github.com/mrusme/xbsapi/lib"
 
 	"go.uber.org/zap"
@@ -73,24 +74,24 @@ func GCFHandler(
 }
 
 func main() {
-	// var err error
+	var err error
 	var xbsctx lib.XBSContext
-	// var entClient *ent.Client
+	var entClient *ent.Client
 
-	// entClient, err = ent.Open(config.Database.Type, config.Database.Connection)
-	// if err != nil {
-	// 	logger.Error(
-	// 		"Failed initializing database",
-	// 		zap.Error(err),
-	// 	)
-	// }
-	// defer entClient.Close()
-	// if err := entClient.Schema.Create(context.Background()); err != nil {
-	// 	logger.Error(
-	// 		"Failed initializing schema",
-	// 		zap.Error(err),
-	// 	)
-	// }
+	entClient, err = ent.Open(config.Database.Type, config.Database.Connection)
+	if err != nil {
+		logger.Error(
+			"Failed initializing database",
+			zap.Error(err),
+		)
+	}
+	defer entClient.Close()
+	if err := entClient.Schema.Create(context.Background()); err != nil {
+		logger.Error(
+			"Failed initializing schema",
+			zap.Error(err),
+		)
+	}
 
 	xbsctx = lib.XBSContext{
 		Logger: logger,

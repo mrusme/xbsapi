@@ -2,32 +2,32 @@ package bookmarks
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/mrusme/xbsapi/ent"
 	"github.com/mrusme/xbsapi/lib"
 	"go.uber.org/zap"
 )
 
 type handler struct {
-	xbsctx *lib.XBSContext
-	config *lib.Config
-	// entClient *ent.Client
-	logger *zap.Logger
+	xbsctx    *lib.XBSContext
+	config    *lib.Config
+	entClient *ent.Client
+	logger    *zap.Logger
 }
 
 type BookmarkShowModel struct {
-	ID           string `json:"id"`
-	Bookmarkname string `json:"username"`
-	Role         string `json:"role"`
+	ID          string `json:"id,omitempty"`
+	Bookmarks   string `json:"bookmarks,omitempty"`
+	LastUpdated string `json:"lastUpdated,omitempty"`
+	Version     string `json:"version,omitempty"`
 }
 
 type BookmarkCreateModel struct {
-	Bookmarkname string `json:"username" validate:"required,alphanum,max=32"`
-	Password     string `json:"password" validate:"required"`
-	Role         string `json:"role" validate:"required"`
+	Version string `json:"version" validate:"required"`
 }
 
 type BookmarkUpdateModel struct {
-	Password string `json:"password,omitempty" validate:"omitempty,min=5"`
-	Role     string `json:"role,omitempty" validate:"omitempty"`
+	Bookmarks   string `json:"bookmarks" validate:"required"`
+	LastUpdated string `json:"lastUpdated" validate:"required"`
 }
 
 func Register(
