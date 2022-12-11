@@ -26,6 +26,15 @@ definitions:
       version:
         type: string
     type: object
+  bookmarks.BookmarkShowResponse:
+    properties:
+      bookmark:
+        $ref: '#/definitions/bookmarks.BookmarkShowModel'
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
 info:
   contact: {}
 paths:
@@ -63,6 +72,41 @@ paths:
       security:
       - BasicAuth: []
       summary: Create a bookmark
+      tags:
+      - bookmarks
+  /bookmarks/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get bookmark by ID
+      parameters:
+      - description: Bookmark ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkShowResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkShowResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkShowResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkShowResponse'
+      security:
+      - BasicAuth: []
+      summary: Show a bookmark
       tags:
       - bookmarks
 swagger: "2.0"

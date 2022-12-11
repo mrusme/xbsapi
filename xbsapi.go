@@ -94,7 +94,8 @@ func main() {
 	}
 
 	xbsctx = lib.XBSContext{
-		Logger: logger,
+		EntClient: entClient,
+		Logger:    logger,
 	}
 
 	fiberApp = fiber.New(fiber.Config{

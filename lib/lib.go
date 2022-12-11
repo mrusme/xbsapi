@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"entgo.io/ent/examples/m2m2types/ent"
+	"github.com/mrusme/xbsapi/ent"
 	"go.uber.org/zap"
 )
 

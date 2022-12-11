@@ -19,25 +19,19 @@ type Config struct {
 	}
 
 	Server struct {
-		BindIP   string
-		Port     string
-		Endpoint struct {
-			Api string
-			Web string
-		}
+		BindIP string
+		Port   string
 	}
 }
 
 func Cfg() (Config, error) {
-	viper.SetDefault("Debug", "false")
+	viper.SetDefault("Debug", "true")
 
 	viper.SetDefault("Database.Type", "sqlite3")
 	viper.SetDefault("Database.Connection", "file:ent?mode=memory&cache=shared&_fk=1")
 
 	viper.SetDefault("Server.BindIP", "127.0.0.1")
 	viper.SetDefault("Server.Port", "8000")
-	viper.SetDefault("Server.Endpoint.Api", "http://127.0.0.1:8000/api")
-	viper.SetDefault("Server.Endpoint.Web", "http://127.0.0.1:8000/web")
 
 	viper.SetConfigName("xbsapi.toml")
 	viper.SetConfigType("toml")

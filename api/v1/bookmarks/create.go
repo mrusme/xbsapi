@@ -2,12 +2,17 @@ package bookmarks
 
 import (
 	"context"
+	"fmt"
+	"strings"
+
 	// "github.com/google/uuid"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+const LAST_UPDATED_FORMAT string = "2006-01-02T15:04:05.1234Z"
 
 type BookmarkCreateResponse struct {
 	Success  bool               `json:"success"`
@@ -39,10 +44,9 @@ func (h *handler) Create(ctx *fiber.Ctx) error {
 		)
 		return ctx.
 			Status(fiber.StatusInternalServerError).
-			JSON(BookmarkCreateResponse{
-				Success:  false,
-				Bookmark: nil,
-				Message:  err.Error(),
+			JSON(fiber.Map{
+				"success": false,
+				"message": err.Error(),
 			})
 	}
 
@@ -54,10 +58,9 @@ func (h *handler) Create(ctx *fiber.Ctx) error {
 		)
 		return ctx.
 			Status(fiber.StatusBadRequest).
-			JSON(BookmarkCreateResponse{
-				Success:  false,
-				Bookmark: nil,
-				Message:  err.Error(),
+			JSON(fiber.Map{
+				"success": false,
+				"message": err.Error(),
 			})
 	}
 
@@ -81,10 +84,13 @@ func (h *handler) Create(ctx *fiber.Ctx) error {
 	}
 
 	showBookmark := BookmarkShowModel{
-		ID:          dbBookmark.ID.String(),
-		LastUpdated: dbBookmark.LastUpdated.String(),
+		ID:          strings.ReplaceAll(dbBookmark.ID.String(), "-", ""),
+		LastUpdated: dbBookmark.LastUpdated.Format(LAST_UPDATED_FORMAT),
 		Version:     dbBookmark.Version,
 	}
+
+	fmt.Println(dbBookmark.ID.String())
+	fmt.Printf("%v\n", showBookmark)
 
 	return ctx.
 		Status(fiber.StatusOK).

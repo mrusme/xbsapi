@@ -37,13 +37,13 @@ func Register(
 	endpoint := new(handler)
 	endpoint.xbsctx = xbsctx
 	endpoint.config = endpoint.xbsctx.Config
-	// endpoint.entClient = endpoint.xbsctx.EntClient
+	endpoint.entClient = endpoint.xbsctx.EntClient
 	endpoint.logger = endpoint.xbsctx.Logger
 
-	// bookmarksRouter := (*fiberRouter).Group("/bookmarks")
+	bookmarksRouter := (*fiberRouter).Group("/bookmarks")
 	// bookmarksRouter.Get("/", endpoint.List)
-	// bookmarksRouter.Get("/:id", endpoint.Show)
-	// bookmarksRouter.Post("/", endpoint.Create)
+	bookmarksRouter.Get("/:id", endpoint.Show)
+	bookmarksRouter.Post("/", endpoint.Create)
 	// bookmarksRouter.Put("/:id", endpoint.Update)
 	// bookmarksRouter.Delete("/:id", endpoint.Destroy)
 }
