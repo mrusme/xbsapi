@@ -1,7 +1,10 @@
 package bookmarks
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/mrusme/xbsapi/ent"
 	"github.com/mrusme/xbsapi/lib"
 	"go.uber.org/zap"
@@ -12,6 +15,17 @@ type handler struct {
 	config    *lib.Config
 	entClient *ent.Client
 	logger    *zap.Logger
+}
+
+func (h *handler) getUUIDFromID(param_id string) (uuid.UUID, error) {
+	param_uuid := fmt.Sprintf("%s-%s-%s-%s-%s",
+		param_id[0:8],
+		param_id[8:12],
+		param_id[12:16],
+		param_id[16:20],
+		param_id[20:32],
+	)
+	return uuid.Parse(param_uuid)
 }
 
 type BookmarkShowModel struct {
@@ -44,6 +58,6 @@ func Register(
 	// bookmarksRouter.Get("/", endpoint.List)
 	bookmarksRouter.Get("/:id", endpoint.Show)
 	bookmarksRouter.Post("/", endpoint.Create)
-	// bookmarksRouter.Put("/:id", endpoint.Update)
+	bookmarksRouter.Put("/:id", endpoint.Update)
 	// bookmarksRouter.Delete("/:id", endpoint.Destroy)
 }

@@ -2,9 +2,7 @@ package bookmarks
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/mrusme/xbsapi/ent/bookmark"
 
 	"github.com/gofiber/fiber/v2"
@@ -32,23 +30,13 @@ type BookmarkShowResponse struct {
 func (h *handler) Show(ctx *fiber.Ctx) error {
 	var err error
 
-	param_id := ctx.Params("id")
-	param_uuid := fmt.Sprintf("%s-%s-%s-%s-%s",
-		param_id[0:8],
-		param_id[8:12],
-		param_id[12:16],
-		param_id[16:20],
-		param_id[20:32],
-	)
-	fmt.Println(param_uuid)
-	id, err := uuid.Parse(param_uuid)
+	id, err := h.getUUIDFromID(ctx.Params("id"))
 	if err != nil {
 		return ctx.
 			Status(fiber.StatusBadRequest).
-			JSON(BookmarkShowResponse{
-				Success:  false,
-				Bookmark: nil,
-				Message:  err.Error(),
+			JSON(fiber.Map{
+				"success": false,
+				"message": err.Error(),
 			})
 	}
 
