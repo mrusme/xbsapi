@@ -1,8 +1,12 @@
 package api
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 	v1 "github.com/mrusme/xbsapi/api/v1"
 	"github.com/mrusme/xbsapi/lib"
 )
@@ -30,6 +34,25 @@ func Register(
 ) {
 	api := fiberApp.Group("/api")
 	api.Use(cors.New())
+	api.Use(limiter.New(limiter.Config{
+		Next: func(c *fiber.Ctx) bool {
+			return c.IP() == "127.0.0.1"
+		},
+		Max:        20,
+		Expiration: 30 * time.Second,
+		KeyGenerator: func(c *fiber.Ctx) string {
+			return fmt.Sprintf(
+				"%s-%s",
+				c.IP(),
+				c.Get("x-forwarded-for"),
+			)
+		},
+		LimitReached: func(c *fiber.Ctx) error {
+			return c.
+				Status(fiber.StatusTooManyRequests).
+				JSON(fiber.Map{})
+		},
+	}))
 
 	v1.Register(
 		xbsctx,
