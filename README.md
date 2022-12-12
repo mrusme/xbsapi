@@ -1,8 +1,9 @@
 xbsapi
 ------
+[![Release](https://github.com/mrusme/xbsapi/actions/workflows/release.yml/badge.svg)](https://github.com/mrusme/xbsapi/releases)
+[![Docker](https://github.com/mrusme/xbsapi/actions/workflows/docker.yml/badge.svg)](https://hub.docker.com/r/mrusme/xbsapi)
 
-An alternative REST API that serves requests from 
-[xBrowserSync](https://www.xbrowsersync.org/) client apps, that is a single 
+Alternative [xBrowserSync](https://www.xbrowsersync.org/) API that is a single 
 binary and supports SQLite3, PostgreSQL and MySQL.
 
 
