@@ -30,7 +30,7 @@ func Cfg() (Config, error) {
 	viper.SetDefault("Database.Type", "sqlite3")
 	viper.SetDefault("Database.Connection", "file:ent?mode=memory&cache=shared&_fk=1")
 
-	viper.SetDefault("Server.BindIP", "127.0.0.1")
+	viper.SetDefault("Server.BindIP", "0.0.0.0")
 	viper.SetDefault("Server.Port", "8000")
 
 	viper.SetConfigName("xbsapi.toml")
