@@ -35,6 +35,36 @@ definitions:
       success:
         type: boolean
     type: object
+  bookmarks.BookmarkUpdateModel:
+    properties:
+      bookmarks:
+        type: string
+      lastUpdated:
+        type: string
+    required:
+    - bookmarks
+    - lastUpdated
+    type: object
+  bookmarks.BookmarkUpdateResponse:
+    properties:
+      bookmark:
+        $ref: '#/definitions/bookmarks.BookmarkShowModel'
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  infos.InfoShowModel:
+    properties:
+      maxSyncSize:
+        type: integer
+      message:
+        type: string
+      status:
+        type: integer
+      version:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -42,9 +72,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Add a new bookmark
+      description: Add a new bookmark sync
       parameters:
-      - description: Add bookmark
+      - description: Bookmark sync
         in: body
         name: bookmark
         required: true
@@ -71,14 +101,14 @@ paths:
             $ref: '#/definitions/bookmarks.BookmarkCreateResponse'
       security:
       - BasicAuth: []
-      summary: Create a bookmark
+      summary: Create a bookmark sync
       tags:
       - bookmarks
   /bookmarks/{id}:
     get:
       consumes:
       - application/json
-      description: Get bookmark by ID
+      description: Get bookmark sync version by ID
       parameters:
       - description: Bookmark ID
         in: path
@@ -106,7 +136,64 @@ paths:
             $ref: '#/definitions/bookmarks.BookmarkShowResponse'
       security:
       - BasicAuth: []
-      summary: Show a bookmark
+      summary: Show a bookmark sync version
       tags:
       - bookmarks
+    put:
+      consumes:
+      - application/json
+      description: Update an existing bookmark sync
+      parameters:
+      - description: Bookmark ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update
+        in: body
+        name: bookmark
+        required: true
+        schema:
+          $ref: '#/definitions/bookmarks.BookmarkUpdateModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkUpdateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkUpdateResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkUpdateResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/bookmarks.BookmarkUpdateResponse'
+      security:
+      - BasicAuth: []
+      summary: Update a bookmark sync
+      tags:
+      - bookmarks
+  /infos:
+    get:
+      consumes:
+      - application/json
+      description: Get all infos
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/infos.InfoShowModel'
+      security:
+      - BasicAuth: []
+      summary: List infos
+      tags:
+      - infos
 swagger: "2.0"

@@ -23,7 +23,7 @@ const docTemplate = `{
                         "BasicAuth": []
                     }
                 ],
-                "description": "Add a new bookmark",
+                "description": "Add a new bookmark sync",
                 "consumes": [
                     "application/json"
                 ],
@@ -33,10 +33,10 @@ const docTemplate = `{
                 "tags": [
                     "bookmarks"
                 ],
-                "summary": "Create a bookmark",
+                "summary": "Create a bookmark sync",
                 "parameters": [
                     {
-                        "description": "Add bookmark",
+                        "description": "Bookmark sync",
                         "name": "bookmark",
                         "in": "body",
                         "required": true,
@@ -80,7 +80,7 @@ const docTemplate = `{
                         "BasicAuth": []
                     }
                 ],
-                "description": "Get bookmark by ID",
+                "description": "Get bookmark sync version by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -90,7 +90,7 @@ const docTemplate = `{
                 "tags": [
                     "bookmarks"
                 ],
-                "summary": "Show a bookmark",
+                "summary": "Show a bookmark sync version",
                 "parameters": [
                     {
                         "type": "string",
@@ -123,6 +123,96 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/bookmarks.BookmarkShowResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Update an existing bookmark sync",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bookmarks"
+                ],
+                "summary": "Update a bookmark sync",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bookmark ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update",
+                        "name": "bookmark",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/bookmarks.BookmarkUpdateModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/bookmarks.BookmarkUpdateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bookmarks.BookmarkUpdateResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bookmarks.BookmarkUpdateResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/bookmarks.BookmarkUpdateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/infos": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Get all infos",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "infos"
+                ],
+                "summary": "List infos",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/infos.InfoShowModel"
                         }
                     }
                 }
@@ -183,6 +273,52 @@ const docTemplate = `{
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "bookmarks.BookmarkUpdateModel": {
+            "type": "object",
+            "required": [
+                "bookmarks",
+                "lastUpdated"
+            ],
+            "properties": {
+                "bookmarks": {
+                    "type": "string"
+                },
+                "lastUpdated": {
+                    "type": "string"
+                }
+            }
+        },
+        "bookmarks.BookmarkUpdateResponse": {
+            "type": "object",
+            "properties": {
+                "bookmark": {
+                    "$ref": "#/definitions/bookmarks.BookmarkShowModel"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "infos.InfoShowModel": {
+            "type": "object",
+            "properties": {
+                "maxSyncSize": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "string"
                 }
             }
         }
