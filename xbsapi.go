@@ -96,6 +96,7 @@ func main() {
 	}
 
 	xbsctx = lib.XBSContext{
+		Config:    &config,
 		EntClient: entClient,
 		Logger:    logger,
 	}
