@@ -12,7 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-const LAST_UPDATED_FORMAT string = "2006-01-02T15:04:05.1234Z"
+const LAST_UPDATED_FORMAT string = "2006-01-02T15:04:05.000Z"
 
 type BookmarkCreateResponse struct {
 	Success  bool               `json:"success"`

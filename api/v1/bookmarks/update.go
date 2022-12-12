@@ -72,10 +72,16 @@ func (h *handler) Update(ctx *fiber.Ctx) error {
 
 	if updateBookmark.LastUpdated != "" {
 		t, err := time.Parse(LAST_UPDATED_FORMAT, updateBookmark.LastUpdated)
-		if err == nil {
-			dbBookmarkTmp = dbBookmarkTmp.
-				SetLastUpdated(t)
+		if err != nil {
+			return ctx.
+				Status(fiber.StatusInternalServerError).
+				JSON(fiber.Map{
+					"success": false,
+					"message": err.Error(),
+				})
 		}
+		dbBookmarkTmp = dbBookmarkTmp.
+			SetLastUpdated(t)
 	}
 
 	dbBookmark, err := dbBookmarkTmp.Save(context.Background())
