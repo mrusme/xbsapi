@@ -145,10 +145,6 @@ func main() {
 		"initialized compress middleware",
 	)
 
-	fiberApp.Use(fiberzap.New(fiberzap.Config{
-		Logger: logger,
-	}))
-
 	api.Register(
 		&xbsctx,
 		fiberApp,
