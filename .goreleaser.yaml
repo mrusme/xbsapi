@@ -2,15 +2,13 @@
 builds:
   -
     env:
-      - CGO_ENABLED=1
+      - CGO_ENABLED=0
     goos:
-      - darwin
       - dragonfly
       - freebsd
       - linux
       - netbsd
       - openbsd
-      # - plan9
       - windows
     goarch:
       - 386
@@ -25,17 +23,6 @@ builds:
       - 6
       - 7
     ignore:
-      - goos: darwin
-        goarch: 386
-      - goos: darwin
-        goarch: arm
-      - goos: darwin
-        goarch: ppc64
-      - goos: darwin
-        goarch: ppc64le
-      - goos: darwin
-        goarch: riscv64
-
       - goos: dragonfly
         goarch: 386
       - goos: dragonfly
