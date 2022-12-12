@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -36,10 +35,10 @@ func Register(
 	api.Use(cors.New())
 	api.Use(limiter.New(limiter.Config{
 		Next: func(c *fiber.Ctx) bool {
-			return c.IP() == "127.0.0.1"
+			return c.IP() == "127.0.0.1" && c.Get("x-forwarded-for") == ""
 		},
-		Max:        20,
-		Expiration: 30 * time.Second,
+		Max:        xbsctx.Config.Limiter.Max,
+		Expiration: xbsctx.Config.Limiter.Expiration,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			return fmt.Sprintf(
 				"%s-%s",

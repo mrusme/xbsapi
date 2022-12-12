@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -52,6 +53,11 @@ type Config struct {
 		Message     string
 		MaxSyncSize int
 	}
+
+	Limiter struct {
+		Max        int
+		Expiration time.Duration
+	}
 }
 
 func Cfg() (Config, error) {
@@ -81,6 +87,9 @@ func Cfg() (Config, error) {
 	viper.SetDefault("Service.Status", strconv.Itoa(int(StatusOnline)))
 	viper.SetDefault("Service.Message", "It really whips the llama's ass")
 	viper.SetDefault("Service.MaxSyncSize", strconv.Itoa(204800))
+
+	viper.SetDefault("Limiter.Max", strconv.Itoa(20))
+	viper.SetDefault("Limiter.Expiration", strconv.Itoa(60))
 
 	viper.SetConfigName("xbsapi.toml")
 	viper.SetConfigType("toml")
