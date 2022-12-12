@@ -11,6 +11,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	StatusOnline     int8 = iota
+	StatusOffline         = 2
+	StatusNoNewSyncs      = 3
+)
+
+type ServiceStatus int8
+
 type Config struct {
 	Debug string
 
@@ -38,6 +46,12 @@ type Config struct {
 		Network                 string
 		EnablePrintRoutes       bool
 	}
+
+	Service struct {
+		Status      ServiceStatus
+		Message     string
+		MaxSyncSize int
+	}
 }
 
 func Cfg() (Config, error) {
@@ -63,6 +77,10 @@ func Cfg() (Config, error) {
 	viper.SetDefault("Server.ReduceMemoryUsage", "false")
 	viper.SetDefault("Server.Network", "tcp")
 	viper.SetDefault("Server.EnablePrintRoutes", "false")
+
+	viper.SetDefault("Service.Status", strconv.Itoa(int(StatusOnline)))
+	viper.SetDefault("Service.Message", "It really whips the llama's ass")
+	viper.SetDefault("Service.MaxSyncSize", strconv.Itoa(204800))
 
 	viper.SetConfigName("xbsapi.toml")
 	viper.SetConfigType("toml")
