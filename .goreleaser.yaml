@@ -1,6 +1,8 @@
 # .goreleaser.yaml
 builds:
   -
+    env:
+      - CGO_ENABLED=1
     goos:
       - darwin
       - dragonfly
