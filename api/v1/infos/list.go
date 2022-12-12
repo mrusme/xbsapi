@@ -10,17 +10,14 @@ import (
 // @Tags         infos
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  InfoListResponse
-// @Failure      400  {object}  InfoListResponse
-// @Failure      404  {object}  InfoListResponse
-// @Failure      500  {object}  InfoListResponse
+// @Success      200  {object}  InfoShowModel
 // @Router       /infos [get]
 // @security     BasicAuth
 func (h *handler) List(ctx *fiber.Ctx) error {
 	showInfo := InfoShowModel{
-		MaxSyncSize: 204800,
-		Message:     "It really whips the llama's ass",
-		Status:      1,
+		MaxSyncSize: h.config.Service.MaxSyncSize,
+		Message:     h.config.Service.Message,
+		Status:      int(h.config.Service.Status),
 		Version:     "2.0.0",
 	}
 
