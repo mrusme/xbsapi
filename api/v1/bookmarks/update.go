@@ -62,6 +62,15 @@ func (h *handler) Update(ctx *fiber.Ctx) error {
 			})
 	}
 
+	if len(updateBookmark.Bookmarks) > h.config.Service.MaxSyncSize {
+		return ctx.
+			Status(fiber.StatusRequestEntityTooLarge).
+			JSON(fiber.Map{
+				"success": false,
+				"message": "Quota exceeded!",
+			})
+	}
+
 	dbBookmarkTmp := h.entClient.Bookmark.
 		UpdateOneID(id)
 
