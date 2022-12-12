@@ -21,12 +21,12 @@ type BookmarkCreateResponse struct {
 }
 
 // Create godoc
-// @Summary      Create a bookmark
-// @Description  Add a new bookmark
+// @Summary      Create a bookmark sync
+// @Description  Add a new bookmark sync
 // @Tags         bookmarks
 // @Accept       json
 // @Produce      json
-// @Param        bookmark body      BookmarkCreateModel true "Add bookmark"
+// @Param        bookmark body  BookmarkCreateModel true "Bookmark sync"
 // @Success      200  {object}  BookmarkCreateResponse
 // @Failure      400  {object}  BookmarkCreateResponse
 // @Failure      404  {object}  BookmarkCreateResponse

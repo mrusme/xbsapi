@@ -16,13 +16,13 @@ type BookmarkUpdateResponse struct {
 }
 
 // Update godoc
-// @Summary      Update a bookmark
-// @Description  Change an existing bookmark
+// @Summary      Update a bookmark sync
+// @Description  Update an existing bookmark sync
 // @Tags         bookmarks
 // @Accept       json
 // @Produce      json
 // @Param        id   path      string true "Bookmark ID"
-// @Param        bookmark body      BookmarkUpdateModel true "Change bookmark"
+// @Param        bookmark body  BookmarkUpdateModel true "Update"
 // @Success      200  {object}  BookmarkUpdateResponse
 // @Failure      400  {object}  BookmarkUpdateResponse
 // @Failure      404  {object}  BookmarkUpdateResponse

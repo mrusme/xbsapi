@@ -15,12 +15,12 @@ type BookmarkShowResponse struct {
 }
 
 // Show godoc
-// @Summary      Show a bookmark
-// @Description  Get bookmark by ID
+// @Summary      Show a bookmark sync
+// @Description  Get bookmark sync by ID
 // @Tags         bookmarks
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string true "Bookmark ID"
+// @Param        id   path      string true "Bookmark sync ID"
 // @Success      200  {object}  BookmarkShowResponse
 // @Failure      400  {object}  BookmarkShowResponse
 // @Failure      404  {object}  BookmarkShowResponse

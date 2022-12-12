@@ -9,8 +9,8 @@ import (
 )
 
 // Show godoc
-// @Summary      Show a bookmark
-// @Description  Get bookmark by ID
+// @Summary      Show a bookmark sync version
+// @Description  Get bookmark sync version by ID
 // @Tags         bookmarks
 // @Accept       json
 // @Produce      json
