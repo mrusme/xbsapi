@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -21,6 +22,21 @@ type Config struct {
 	Server struct {
 		BindIP string
 		Port   string
+
+		Prefork                 bool
+		ServerHeader            string
+		StrictRouting           bool
+		CaseSensitive           bool
+		ETag                    bool
+		Concurrency             int
+		ProxyHeader             string
+		EnableTrustedProxyCheck bool
+		TrustedProxies          []string
+		DisableStartupMessage   bool
+		AppName                 string
+		ReduceMemoryUsage       bool
+		Network                 string
+		EnablePrintRoutes       bool
 	}
 }
 
@@ -32,6 +48,21 @@ func Cfg() (Config, error) {
 
 	viper.SetDefault("Server.BindIP", "0.0.0.0")
 	viper.SetDefault("Server.Port", "8000")
+
+	viper.SetDefault("Server.Prefork", "false")
+	viper.SetDefault("Server.ServerHeader", "")
+	viper.SetDefault("Server.StrictRouting", "false")
+	viper.SetDefault("Server.CaseSensitive", "false")
+	viper.SetDefault("Server.ETag", "false")
+	viper.SetDefault("Server.Concurrency", strconv.Itoa(256*1024))
+	viper.SetDefault("Server.ProxyHeader", "")
+	viper.SetDefault("Server.EnableTrustedProxyCheck", "false")
+	viper.SetDefault("Server.TrustedProxies", "")
+	viper.SetDefault("Server.DisableStartupMessage", "true")
+	viper.SetDefault("Server.AppName", "xbsapi")
+	viper.SetDefault("Server.ReduceMemoryUsage", "false")
+	viper.SetDefault("Server.Network", "tcp")
+	viper.SetDefault("Server.EnablePrintRoutes", "false")
 
 	viper.SetConfigName("xbsapi.toml")
 	viper.SetConfigType("toml")

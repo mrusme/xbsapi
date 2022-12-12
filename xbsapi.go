@@ -18,6 +18,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -99,21 +101,50 @@ func main() {
 	}
 
 	fiberApp = fiber.New(fiber.Config{
-		Prefork:                 false, // TODO: Make configurable
-		ServerHeader:            "",    // TODO: Make configurable
-		StrictRouting:           false,
-		CaseSensitive:           false,
-		ETag:                    false,      // TODO: Make configurable
-		Concurrency:             256 * 1024, // TODO: Make configurable
-		ProxyHeader:             "",         // TODO: Make configurable
-		EnableTrustedProxyCheck: false,      // TODO: Make configurable
-		TrustedProxies:          []string{}, // TODO: Make configurable
-		DisableStartupMessage:   true,
-		AppName:                 "xbsapi",
-		ReduceMemoryUsage:       false,            // TODO: Make configurable
-		Network:                 fiber.NetworkTCP, // TODO: Make configurable
-		EnablePrintRoutes:       false,
+		Prefork:                 config.Server.Prefork,
+		ServerHeader:            config.Server.ServerHeader,
+		StrictRouting:           config.Server.StrictRouting,
+		CaseSensitive:           config.Server.CaseSensitive,
+		ETag:                    config.Server.ETag,
+		Concurrency:             config.Server.Concurrency,
+		ProxyHeader:             config.Server.ProxyHeader,
+		EnableTrustedProxyCheck: config.Server.EnableTrustedProxyCheck,
+		TrustedProxies:          config.Server.TrustedProxies,
+		DisableStartupMessage:   config.Server.DisableStartupMessage,
+		AppName:                 config.Server.AppName,
+		ReduceMemoryUsage:       config.Server.ReduceMemoryUsage,
+		Network:                 config.Server.Network,
+		EnablePrintRoutes:       config.Server.EnablePrintRoutes,
 	})
+	logger.Info(
+		"initialized fiber",
+		zap.Any("config", config.Server),
+	)
+
+	fiberApp.Use(recover.New(recover.Config{
+		EnableStackTrace: true,
+		StackTraceHandler: func(ctx *fiber.Ctx, e interface{}) {
+			logger.Error(
+				"PANIC",
+				zap.Any("error", e),
+			)
+		},
+	}))
+
+	fiberApp.Use(fiberzap.New(fiberzap.Config{
+		Logger: logger,
+	}))
+	logger.Info(
+		"initialized logger middleware",
+	)
+
+	fiberApp.Use(compress.New(compress.Config{
+		Level: compress.LevelBestSpeed, // TODO: Config
+	}))
+	logger.Info(
+		"initialized compress middleware",
+	)
+
 	fiberApp.Use(fiberzap.New(fiberzap.Config{
 		Logger: logger,
 	}))
