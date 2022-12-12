@@ -20,6 +20,9 @@ $ make
 $ xbsapi
 ```
 
+Connect from xBrowserSync clients by using e.g. `http://host:8000/api/v1` as 
+service URL. It is important to add `/api/v1` to the server URL!
+
 
 ## Configuration
 
