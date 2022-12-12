@@ -15,6 +15,7 @@ type handler struct {
 }
 
 type InfoShowModel struct {
+	Location    string `json:"location"`
 	MaxSyncSize int    `json:"maxSyncSize"`
 	Message     string `json:"message"`
 	Status      int    `json:"status"`

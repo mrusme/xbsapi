@@ -49,6 +49,7 @@ type Config struct {
 	}
 
 	Service struct {
+		Location    string
 		Status      ServiceStatus
 		Message     string
 		MaxSyncSize int
@@ -84,12 +85,13 @@ func Cfg() (Config, error) {
 	viper.SetDefault("Server.Network", "tcp")
 	viper.SetDefault("Server.EnablePrintRoutes", "false")
 
+	viper.SetDefault("Service.Location", "US")
 	viper.SetDefault("Service.Status", strconv.Itoa(int(StatusOnline)))
 	viper.SetDefault("Service.Message", "It really whips the llama's ass")
 	viper.SetDefault("Service.MaxSyncSize", strconv.Itoa(204800))
 
 	viper.SetDefault("Limiter.Max", strconv.Itoa(20))
-	viper.SetDefault("Limiter.Expiration", strconv.Itoa(60))
+	viper.SetDefault("Limiter.Expiration", "60s")
 
 	viper.SetConfigName("xbsapi.toml")
 	viper.SetConfigType("toml")

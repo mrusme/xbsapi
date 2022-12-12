@@ -15,10 +15,11 @@ import (
 // @security     BasicAuth
 func (h *handler) List(ctx *fiber.Ctx) error {
 	showInfo := InfoShowModel{
+		Location:    h.config.Service.Location,
 		MaxSyncSize: h.config.Service.MaxSyncSize,
 		Message:     h.config.Service.Message,
 		Status:      int(h.config.Service.Status),
-		Version:     "2.0.0",
+		Version:     "1.1.13",
 	}
 
 	return ctx.
