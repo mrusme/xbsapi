@@ -12,7 +12,10 @@ ent:
 build:
 	go build -ldflags "-X github.com/mrusme/xbsapi/lib.VERSION=$(VERSION)"
 
-install-deps: install-dep-ent install-dep-swag
+install-deps: install-deps-go install-dep-ent install-dep-swag
+
+install-deps-go:
+	go get
 
 install-dep-ent:
 	go install entgo.io/ent/cmd/ent@latest
