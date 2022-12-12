@@ -7,6 +7,7 @@ import (
 
 	// "github.com/google/uuid"
 	"github.com/go-playground/validator/v10"
+	"github.com/mrusme/xbsapi/lib"
 	"go.uber.org/zap"
 
 	"github.com/gofiber/fiber/v2"
@@ -35,6 +36,15 @@ type BookmarkCreateResponse struct {
 // @security     BasicAuth
 func (h *handler) Create(ctx *fiber.Ctx) error {
 	var err error
+
+	if h.config.Service.Status != lib.ServiceStatus(lib.StatusOnline) {
+		return ctx.
+			Status(fiber.StatusMethodNotAllowed).
+			JSON(fiber.Map{
+				"success": false,
+				"message": "Service not available right now",
+			})
+	}
 
 	createBookmark := new(BookmarkCreateModel)
 	if err = ctx.BodyParser(createBookmark); err != nil {
