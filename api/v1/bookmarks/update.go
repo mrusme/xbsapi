@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/mrusme/xbsapi/ent/bookmark"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -71,29 +72,26 @@ func (h *handler) Update(ctx *fiber.Ctx) error {
 			})
 	}
 
-	dbBookmarkTmp := h.entClient.Bookmark.
-		UpdateOneID(id)
-
-	if updateBookmark.Bookmarks != "" {
-		dbBookmarkTmp = dbBookmarkTmp.
-			SetBookmarks(updateBookmark.Bookmarks)
+	lastUpdated, err := time.Parse(LAST_UPDATED_FORMAT, updateBookmark.LastUpdated)
+	if err != nil {
+		return ctx.
+			Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{
+				"success": false,
+				"message": err.Error(),
+			})
 	}
 
-	if updateBookmark.LastUpdated != "" {
-		t, err := time.Parse(LAST_UPDATED_FORMAT, updateBookmark.LastUpdated)
-		if err != nil {
-			return ctx.
-				Status(fiber.StatusInternalServerError).
-				JSON(fiber.Map{
-					"success": false,
-					"message": err.Error(),
-				})
-		}
-		dbBookmarkTmp = dbBookmarkTmp.
-			SetLastUpdated(t)
-	}
-
-	dbBookmark, err := dbBookmarkTmp.Save(context.Background())
+	now := time.Now()
+	dbBookmarkN, err := h.entClient.Bookmark.
+		Update().
+		Where(bookmark.And(
+			bookmark.ID(id),
+			bookmark.LastUpdated(lastUpdated),
+		)).
+		SetBookmarks(updateBookmark.Bookmarks).
+		SetLastUpdated(now).
+		Save(context.Background())
 
 	if err != nil {
 		return ctx.
@@ -104,8 +102,17 @@ func (h *handler) Update(ctx *fiber.Ctx) error {
 			})
 	}
 
+	if dbBookmarkN != 0 {
+		return ctx.
+			Status(fiber.StatusConflict).
+			JSON(fiber.Map{
+				"success": false,
+				"message": "Internal sync error",
+			})
+	}
+
 	showBookmark := BookmarkShowModel{
-		LastUpdated: dbBookmark.LastUpdated.Format(LAST_UPDATED_FORMAT),
+		LastUpdated: now.Format(LAST_UPDATED_FORMAT),
 	}
 
 	return ctx.
