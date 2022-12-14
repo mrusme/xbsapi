@@ -87,7 +87,8 @@ func (h *handler) Update(ctx *fiber.Ctx) error {
 		Update().
 		Where(bookmark.And(
 			bookmark.ID(id),
-			bookmark.LastUpdated(lastUpdated.Truncate(time.Millisecond)),
+			bookmark.LastUpdatedGTE(lastUpdated.Add(time.Second*-1)),
+			bookmark.LastUpdatedLTE(lastUpdated.Add(time.Second*1)),
 		)).
 		SetBookmarks(updateBookmark.Bookmarks).
 		SetLastUpdated(now).
