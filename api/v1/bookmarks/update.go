@@ -102,7 +102,7 @@ func (h *handler) Update(ctx *fiber.Ctx) error {
 			})
 	}
 
-	if dbBookmarkN != 0 {
+	if dbBookmarkN != 1 {
 		return ctx.
 			Status(fiber.StatusConflict).
 			JSON(fiber.Map{
