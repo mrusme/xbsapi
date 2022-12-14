@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	// "github.com/google/uuid"
 	"github.com/go-playground/validator/v10"
@@ -77,6 +78,7 @@ func (h *handler) Create(ctx *fiber.Ctx) error {
 	dbBookmark, err := h.entClient.Bookmark.
 		Create().
 		SetBookmarks("").
+		SetLastUpdated(time.Now().Truncate(time.Millisecond)).
 		SetVersion(createBookmark.Version).
 		Save(context.Background())
 

@@ -82,12 +82,12 @@ func (h *handler) Update(ctx *fiber.Ctx) error {
 			})
 	}
 
-	now := time.Now()
+	now := time.Now().Truncate(time.Millisecond)
 	dbBookmarkN, err := h.entClient.Bookmark.
 		Update().
 		Where(bookmark.And(
 			bookmark.ID(id),
-			bookmark.LastUpdated(lastUpdated),
+			bookmark.LastUpdated(lastUpdated.Truncate(time.Millisecond)),
 		)).
 		SetBookmarks(updateBookmark.Bookmarks).
 		SetLastUpdated(now).
