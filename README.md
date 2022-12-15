@@ -6,6 +6,9 @@ xbsapi
 Alternative [xBrowserSync](https://www.xbrowsersync.org/) API that is a single 
 binary and supports SQLite3, PostgreSQL and MySQL.
 
+See [xbscli](https://github.com/mrusme/xbscli) for a command line interface 
+(client).
+
 
 ## Build
 
