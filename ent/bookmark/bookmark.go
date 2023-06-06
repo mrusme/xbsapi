@@ -5,6 +5,7 @@ package bookmark
 import (
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 )
 
@@ -61,3 +62,36 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the Bookmark queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByBookmarks orders the results by the bookmarks field.
+func ByBookmarks(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBookmarks, opts...).ToFunc()
+}
+
+// ByVersion orders the results by the version field.
+func ByVersion(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVersion, opts...).ToFunc()
+}
+
+// ByCreated orders the results by the created field.
+func ByCreated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreated, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the lastUpdated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
+}
+
+// ByDeleted orders the results by the deleted field.
+func ByDeleted(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeleted, opts...).ToFunc()
+}

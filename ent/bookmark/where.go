@@ -12,512 +12,332 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Bookmark(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Bookmark(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Bookmark(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Bookmark(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Bookmark(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Bookmark(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Bookmark(sql.FieldLTE(FieldID, id))
 }
 
 // Bookmarks applies equality check predicate on the "bookmarks" field. It's identical to BookmarksEQ.
 func Bookmarks(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldBookmarks, v))
 }
 
 // Version applies equality check predicate on the "version" field. It's identical to VersionEQ.
 func Version(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldVersion, v))
 }
 
 // Created applies equality check predicate on the "created" field. It's identical to CreatedEQ.
 func Created(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreated), v))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldCreated, v))
 }
 
 // LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
 func LastUpdated(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // Deleted applies equality check predicate on the "deleted" field. It's identical to DeletedEQ.
 func Deleted(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDeleted), v))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldDeleted, v))
 }
 
 // BookmarksEQ applies the EQ predicate on the "bookmarks" field.
 func BookmarksEQ(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldBookmarks, v))
 }
 
 // BookmarksNEQ applies the NEQ predicate on the "bookmarks" field.
 func BookmarksNEQ(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldNEQ(FieldBookmarks, v))
 }
 
 // BookmarksIn applies the In predicate on the "bookmarks" field.
 func BookmarksIn(vs ...string) predicate.Bookmark {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldBookmarks), v...))
-	})
+	return predicate.Bookmark(sql.FieldIn(FieldBookmarks, vs...))
 }
 
 // BookmarksNotIn applies the NotIn predicate on the "bookmarks" field.
 func BookmarksNotIn(vs ...string) predicate.Bookmark {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldBookmarks), v...))
-	})
+	return predicate.Bookmark(sql.FieldNotIn(FieldBookmarks, vs...))
 }
 
 // BookmarksGT applies the GT predicate on the "bookmarks" field.
 func BookmarksGT(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldGT(FieldBookmarks, v))
 }
 
 // BookmarksGTE applies the GTE predicate on the "bookmarks" field.
 func BookmarksGTE(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldGTE(FieldBookmarks, v))
 }
 
 // BookmarksLT applies the LT predicate on the "bookmarks" field.
 func BookmarksLT(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldLT(FieldBookmarks, v))
 }
 
 // BookmarksLTE applies the LTE predicate on the "bookmarks" field.
 func BookmarksLTE(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldLTE(FieldBookmarks, v))
 }
 
 // BookmarksContains applies the Contains predicate on the "bookmarks" field.
 func BookmarksContains(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldContains(FieldBookmarks, v))
 }
 
 // BookmarksHasPrefix applies the HasPrefix predicate on the "bookmarks" field.
 func BookmarksHasPrefix(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldHasPrefix(FieldBookmarks, v))
 }
 
 // BookmarksHasSuffix applies the HasSuffix predicate on the "bookmarks" field.
 func BookmarksHasSuffix(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldHasSuffix(FieldBookmarks, v))
 }
 
 // BookmarksEqualFold applies the EqualFold predicate on the "bookmarks" field.
 func BookmarksEqualFold(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldEqualFold(FieldBookmarks, v))
 }
 
 // BookmarksContainsFold applies the ContainsFold predicate on the "bookmarks" field.
 func BookmarksContainsFold(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldBookmarks), v))
-	})
+	return predicate.Bookmark(sql.FieldContainsFold(FieldBookmarks, v))
 }
 
 // VersionEQ applies the EQ predicate on the "version" field.
 func VersionEQ(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldVersion, v))
 }
 
 // VersionNEQ applies the NEQ predicate on the "version" field.
 func VersionNEQ(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldNEQ(FieldVersion, v))
 }
 
 // VersionIn applies the In predicate on the "version" field.
 func VersionIn(vs ...string) predicate.Bookmark {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldVersion), v...))
-	})
+	return predicate.Bookmark(sql.FieldIn(FieldVersion, vs...))
 }
 
 // VersionNotIn applies the NotIn predicate on the "version" field.
 func VersionNotIn(vs ...string) predicate.Bookmark {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldVersion), v...))
-	})
+	return predicate.Bookmark(sql.FieldNotIn(FieldVersion, vs...))
 }
 
 // VersionGT applies the GT predicate on the "version" field.
 func VersionGT(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldGT(FieldVersion, v))
 }
 
 // VersionGTE applies the GTE predicate on the "version" field.
 func VersionGTE(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldGTE(FieldVersion, v))
 }
 
 // VersionLT applies the LT predicate on the "version" field.
 func VersionLT(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldLT(FieldVersion, v))
 }
 
 // VersionLTE applies the LTE predicate on the "version" field.
 func VersionLTE(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldLTE(FieldVersion, v))
 }
 
 // VersionContains applies the Contains predicate on the "version" field.
 func VersionContains(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldContains(FieldVersion, v))
 }
 
 // VersionHasPrefix applies the HasPrefix predicate on the "version" field.
 func VersionHasPrefix(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldHasPrefix(FieldVersion, v))
 }
 
 // VersionHasSuffix applies the HasSuffix predicate on the "version" field.
 func VersionHasSuffix(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldHasSuffix(FieldVersion, v))
 }
 
 // VersionEqualFold applies the EqualFold predicate on the "version" field.
 func VersionEqualFold(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldEqualFold(FieldVersion, v))
 }
 
 // VersionContainsFold applies the ContainsFold predicate on the "version" field.
 func VersionContainsFold(v string) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldVersion), v))
-	})
+	return predicate.Bookmark(sql.FieldContainsFold(FieldVersion, v))
 }
 
 // CreatedEQ applies the EQ predicate on the "created" field.
 func CreatedEQ(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreated), v))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldCreated, v))
 }
 
 // CreatedNEQ applies the NEQ predicate on the "created" field.
 func CreatedNEQ(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreated), v))
-	})
+	return predicate.Bookmark(sql.FieldNEQ(FieldCreated, v))
 }
 
 // CreatedIn applies the In predicate on the "created" field.
 func CreatedIn(vs ...time.Time) predicate.Bookmark {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreated), v...))
-	})
+	return predicate.Bookmark(sql.FieldIn(FieldCreated, vs...))
 }
 
 // CreatedNotIn applies the NotIn predicate on the "created" field.
 func CreatedNotIn(vs ...time.Time) predicate.Bookmark {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreated), v...))
-	})
+	return predicate.Bookmark(sql.FieldNotIn(FieldCreated, vs...))
 }
 
 // CreatedGT applies the GT predicate on the "created" field.
 func CreatedGT(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreated), v))
-	})
+	return predicate.Bookmark(sql.FieldGT(FieldCreated, v))
 }
 
 // CreatedGTE applies the GTE predicate on the "created" field.
 func CreatedGTE(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreated), v))
-	})
+	return predicate.Bookmark(sql.FieldGTE(FieldCreated, v))
 }
 
 // CreatedLT applies the LT predicate on the "created" field.
 func CreatedLT(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreated), v))
-	})
+	return predicate.Bookmark(sql.FieldLT(FieldCreated, v))
 }
 
 // CreatedLTE applies the LTE predicate on the "created" field.
 func CreatedLTE(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreated), v))
-	})
+	return predicate.Bookmark(sql.FieldLTE(FieldCreated, v))
 }
 
 // LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
 func LastUpdatedEQ(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // LastUpdatedNEQ applies the NEQ predicate on the "lastUpdated" field.
 func LastUpdatedNEQ(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Bookmark(sql.FieldNEQ(FieldLastUpdated, v))
 }
 
 // LastUpdatedIn applies the In predicate on the "lastUpdated" field.
 func LastUpdatedIn(vs ...time.Time) predicate.Bookmark {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLastUpdated), v...))
-	})
+	return predicate.Bookmark(sql.FieldIn(FieldLastUpdated, vs...))
 }
 
 // LastUpdatedNotIn applies the NotIn predicate on the "lastUpdated" field.
 func LastUpdatedNotIn(vs ...time.Time) predicate.Bookmark {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLastUpdated), v...))
-	})
+	return predicate.Bookmark(sql.FieldNotIn(FieldLastUpdated, vs...))
 }
 
 // LastUpdatedGT applies the GT predicate on the "lastUpdated" field.
 func LastUpdatedGT(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Bookmark(sql.FieldGT(FieldLastUpdated, v))
 }
 
 // LastUpdatedGTE applies the GTE predicate on the "lastUpdated" field.
 func LastUpdatedGTE(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Bookmark(sql.FieldGTE(FieldLastUpdated, v))
 }
 
 // LastUpdatedLT applies the LT predicate on the "lastUpdated" field.
 func LastUpdatedLT(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Bookmark(sql.FieldLT(FieldLastUpdated, v))
 }
 
 // LastUpdatedLTE applies the LTE predicate on the "lastUpdated" field.
 func LastUpdatedLTE(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Bookmark(sql.FieldLTE(FieldLastUpdated, v))
 }
 
 // DeletedEQ applies the EQ predicate on the "deleted" field.
 func DeletedEQ(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDeleted), v))
-	})
+	return predicate.Bookmark(sql.FieldEQ(FieldDeleted, v))
 }
 
 // DeletedNEQ applies the NEQ predicate on the "deleted" field.
 func DeletedNEQ(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDeleted), v))
-	})
+	return predicate.Bookmark(sql.FieldNEQ(FieldDeleted, v))
 }
 
 // DeletedIn applies the In predicate on the "deleted" field.
 func DeletedIn(vs ...time.Time) predicate.Bookmark {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDeleted), v...))
-	})
+	return predicate.Bookmark(sql.FieldIn(FieldDeleted, vs...))
 }
 
 // DeletedNotIn applies the NotIn predicate on the "deleted" field.
 func DeletedNotIn(vs ...time.Time) predicate.Bookmark {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDeleted), v...))
-	})
+	return predicate.Bookmark(sql.FieldNotIn(FieldDeleted, vs...))
 }
 
 // DeletedGT applies the GT predicate on the "deleted" field.
 func DeletedGT(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDeleted), v))
-	})
+	return predicate.Bookmark(sql.FieldGT(FieldDeleted, v))
 }
 
 // DeletedGTE applies the GTE predicate on the "deleted" field.
 func DeletedGTE(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDeleted), v))
-	})
+	return predicate.Bookmark(sql.FieldGTE(FieldDeleted, v))
 }
 
 // DeletedLT applies the LT predicate on the "deleted" field.
 func DeletedLT(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDeleted), v))
-	})
+	return predicate.Bookmark(sql.FieldLT(FieldDeleted, v))
 }
 
 // DeletedLTE applies the LTE predicate on the "deleted" field.
 func DeletedLTE(v time.Time) predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDeleted), v))
-	})
+	return predicate.Bookmark(sql.FieldLTE(FieldDeleted, v))
 }
 
 // DeletedIsNil applies the IsNil predicate on the "deleted" field.
 func DeletedIsNil() predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldDeleted)))
-	})
+	return predicate.Bookmark(sql.FieldIsNull(FieldDeleted))
 }
 
 // DeletedNotNil applies the NotNil predicate on the "deleted" field.
 func DeletedNotNil() predicate.Bookmark {
-	return predicate.Bookmark(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldDeleted)))
-	})
+	return predicate.Bookmark(sql.FieldNotNull(FieldDeleted))
 }
 
 // And groups predicates with the AND operator between them.

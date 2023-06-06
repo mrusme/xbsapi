@@ -296,6 +296,9 @@
         "infos.InfoShowModel": {
             "type": "object",
             "properties": {
+                "location": {
+                    "type": "string"
+                },
                 "maxSyncSize": {
                     "type": "integer"
                 },

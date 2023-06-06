@@ -11,10 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/mrusme/xbsapi/ent/migrate"
 
-	"github.com/mrusme/xbsapi/ent/bookmark"
-
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"github.com/mrusme/xbsapi/ent/bookmark"
 )
 
 // Client is the client that holds all ent builders.
@@ -28,7 +28,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -38,6 +38,55 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Bookmark = NewBookmarkClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -123,6 +172,22 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Bookmark.Use(hooks...)
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Bookmark.Intercept(interceptors...)
+}
+
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *BookmarkMutation:
+		return c.Bookmark.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
 // BookmarkClient is a client for the Bookmark schema.
 type BookmarkClient struct {
 	config
@@ -137,6 +202,12 @@ func NewBookmarkClient(c config) *BookmarkClient {
 // A call to `Use(f, g, h)` equals to `bookmark.Hooks(f(g(h())))`.
 func (c *BookmarkClient) Use(hooks ...Hook) {
 	c.hooks.Bookmark = append(c.hooks.Bookmark, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `bookmark.Intercept(f(g(h())))`.
+func (c *BookmarkClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Bookmark = append(c.inters.Bookmark, interceptors...)
 }
 
 // Create returns a builder for creating a Bookmark entity.
@@ -191,6 +262,8 @@ func (c *BookmarkClient) DeleteOneID(id uuid.UUID) *BookmarkDeleteOne {
 func (c *BookmarkClient) Query() *BookmarkQuery {
 	return &BookmarkQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeBookmark},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -212,3 +285,33 @@ func (c *BookmarkClient) GetX(ctx context.Context, id uuid.UUID) *Bookmark {
 func (c *BookmarkClient) Hooks() []Hook {
 	return c.hooks.Bookmark
 }
+
+// Interceptors returns the client interceptors.
+func (c *BookmarkClient) Interceptors() []Interceptor {
+	return c.inters.Bookmark
+}
+
+func (c *BookmarkClient) mutate(ctx context.Context, m *BookmarkMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BookmarkCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BookmarkUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BookmarkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BookmarkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Bookmark mutation op: %q", m.Op())
+	}
+}
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Bookmark []ent.Hook
+	}
+	inters struct {
+		Bookmark []ent.Interceptor
+	}
+)

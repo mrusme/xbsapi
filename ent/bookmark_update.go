@@ -95,41 +95,8 @@ func (bu *BookmarkUpdate) Mutation() *BookmarkMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bu *BookmarkUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	bu.defaults()
-	if len(bu.hooks) == 0 {
-		if err = bu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = bu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BookmarkMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = bu.check(); err != nil {
-				return 0, err
-			}
-			bu.mutation = mutation
-			affected, err = bu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(bu.hooks) - 1; i >= 0; i-- {
-			if bu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = bu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, bu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks(ctx, bu.sqlSave, bu.mutation, bu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -173,16 +140,10 @@ func (bu *BookmarkUpdate) check() error {
 }
 
 func (bu *BookmarkUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   bookmark.Table,
-			Columns: bookmark.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: bookmark.FieldID,
-			},
-		},
+	if err := bu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(bookmark.Table, bookmark.Columns, sqlgraph.NewFieldSpec(bookmark.FieldID, field.TypeUUID))
 	if ps := bu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -216,6 +177,7 @@ func (bu *BookmarkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	bu.mutation.done = true
 	return n, nil
 }
 
@@ -292,6 +254,12 @@ func (buo *BookmarkUpdateOne) Mutation() *BookmarkMutation {
 	return buo.mutation
 }
 
+// Where appends a list predicates to the BookmarkUpdate builder.
+func (buo *BookmarkUpdateOne) Where(ps ...predicate.Bookmark) *BookmarkUpdateOne {
+	buo.mutation.Where(ps...)
+	return buo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (buo *BookmarkUpdateOne) Select(field string, fields ...string) *BookmarkUpdateOne {
@@ -301,47 +269,8 @@ func (buo *BookmarkUpdateOne) Select(field string, fields ...string) *BookmarkUp
 
 // Save executes the query and returns the updated Bookmark entity.
 func (buo *BookmarkUpdateOne) Save(ctx context.Context) (*Bookmark, error) {
-	var (
-		err  error
-		node *Bookmark
-	)
 	buo.defaults()
-	if len(buo.hooks) == 0 {
-		if err = buo.check(); err != nil {
-			return nil, err
-		}
-		node, err = buo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BookmarkMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = buo.check(); err != nil {
-				return nil, err
-			}
-			buo.mutation = mutation
-			node, err = buo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(buo.hooks) - 1; i >= 0; i-- {
-			if buo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = buo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, buo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Bookmark)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from BookmarkMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks(ctx, buo.sqlSave, buo.mutation, buo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -385,16 +314,10 @@ func (buo *BookmarkUpdateOne) check() error {
 }
 
 func (buo *BookmarkUpdateOne) sqlSave(ctx context.Context) (_node *Bookmark, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   bookmark.Table,
-			Columns: bookmark.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: bookmark.FieldID,
-			},
-		},
+	if err := buo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(bookmark.Table, bookmark.Columns, sqlgraph.NewFieldSpec(bookmark.FieldID, field.TypeUUID))
 	id, ok := buo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Bookmark.id" for update`)}
@@ -448,5 +371,6 @@ func (buo *BookmarkUpdateOne) sqlSave(ctx context.Context) (_node *Bookmark, err
 		}
 		return nil, err
 	}
+	buo.mutation.done = true
 	return _node, nil
 }

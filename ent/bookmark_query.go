@@ -18,11 +18,9 @@ import (
 // BookmarkQuery is the builder for querying Bookmark entities.
 type BookmarkQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
+	ctx        *QueryContext
+	order      []bookmark.OrderOption
+	inters     []Interceptor
 	predicates []predicate.Bookmark
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -35,27 +33,27 @@ func (bq *BookmarkQuery) Where(ps ...predicate.Bookmark) *BookmarkQuery {
 	return bq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (bq *BookmarkQuery) Limit(limit int) *BookmarkQuery {
-	bq.limit = &limit
+	bq.ctx.Limit = &limit
 	return bq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (bq *BookmarkQuery) Offset(offset int) *BookmarkQuery {
-	bq.offset = &offset
+	bq.ctx.Offset = &offset
 	return bq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (bq *BookmarkQuery) Unique(unique bool) *BookmarkQuery {
-	bq.unique = &unique
+	bq.ctx.Unique = &unique
 	return bq
 }
 
-// Order adds an order step to the query.
-func (bq *BookmarkQuery) Order(o ...OrderFunc) *BookmarkQuery {
+// Order specifies how the records should be ordered.
+func (bq *BookmarkQuery) Order(o ...bookmark.OrderOption) *BookmarkQuery {
 	bq.order = append(bq.order, o...)
 	return bq
 }
@@ -63,7 +61,7 @@ func (bq *BookmarkQuery) Order(o ...OrderFunc) *BookmarkQuery {
 // First returns the first Bookmark entity from the query.
 // Returns a *NotFoundError when no Bookmark was found.
 func (bq *BookmarkQuery) First(ctx context.Context) (*Bookmark, error) {
-	nodes, err := bq.Limit(1).All(ctx)
+	nodes, err := bq.Limit(1).All(setContextOp(ctx, bq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +84,7 @@ func (bq *BookmarkQuery) FirstX(ctx context.Context) *Bookmark {
 // Returns a *NotFoundError when no Bookmark ID was found.
 func (bq *BookmarkQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = bq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -109,7 +107,7 @@ func (bq *BookmarkQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Bookmark entity is found.
 // Returns a *NotFoundError when no Bookmark entities are found.
 func (bq *BookmarkQuery) Only(ctx context.Context) (*Bookmark, error) {
-	nodes, err := bq.Limit(2).All(ctx)
+	nodes, err := bq.Limit(2).All(setContextOp(ctx, bq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +135,7 @@ func (bq *BookmarkQuery) OnlyX(ctx context.Context) *Bookmark {
 // Returns a *NotFoundError when no entities are found.
 func (bq *BookmarkQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = bq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -162,10 +160,12 @@ func (bq *BookmarkQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Bookmarks.
 func (bq *BookmarkQuery) All(ctx context.Context) ([]*Bookmark, error) {
+	ctx = setContextOp(ctx, bq.ctx, "All")
 	if err := bq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return bq.sqlAll(ctx)
+	qr := querierAll[[]*Bookmark, *BookmarkQuery]()
+	return withInterceptors[[]*Bookmark](ctx, bq, qr, bq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -178,9 +178,12 @@ func (bq *BookmarkQuery) AllX(ctx context.Context) []*Bookmark {
 }
 
 // IDs executes the query and returns a list of Bookmark IDs.
-func (bq *BookmarkQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := bq.Select(bookmark.FieldID).Scan(ctx, &ids); err != nil {
+func (bq *BookmarkQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if bq.ctx.Unique == nil && bq.path != nil {
+		bq.Unique(true)
+	}
+	ctx = setContextOp(ctx, bq.ctx, "IDs")
+	if err = bq.Select(bookmark.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -197,10 +200,11 @@ func (bq *BookmarkQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (bq *BookmarkQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, bq.ctx, "Count")
 	if err := bq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return bq.sqlCount(ctx)
+	return withInterceptors[int](ctx, bq, querierCount[*BookmarkQuery](), bq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -214,10 +218,15 @@ func (bq *BookmarkQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (bq *BookmarkQuery) Exist(ctx context.Context) (bool, error) {
-	if err := bq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, bq.ctx, "Exist")
+	switch _, err := bq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return bq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -237,14 +246,13 @@ func (bq *BookmarkQuery) Clone() *BookmarkQuery {
 	}
 	return &BookmarkQuery{
 		config:     bq.config,
-		limit:      bq.limit,
-		offset:     bq.offset,
-		order:      append([]OrderFunc{}, bq.order...),
+		ctx:        bq.ctx.Clone(),
+		order:      append([]bookmark.OrderOption{}, bq.order...),
+		inters:     append([]Interceptor{}, bq.inters...),
 		predicates: append([]predicate.Bookmark{}, bq.predicates...),
 		// clone intermediate query.
-		sql:    bq.sql.Clone(),
-		path:   bq.path,
-		unique: bq.unique,
+		sql:  bq.sql.Clone(),
+		path: bq.path,
 	}
 }
 
@@ -263,16 +271,11 @@ func (bq *BookmarkQuery) Clone() *BookmarkQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (bq *BookmarkQuery) GroupBy(field string, fields ...string) *BookmarkGroupBy {
-	grbuild := &BookmarkGroupBy{config: bq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := bq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return bq.sqlQuery(ctx), nil
-	}
+	bq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &BookmarkGroupBy{build: bq}
+	grbuild.flds = &bq.ctx.Fields
 	grbuild.label = bookmark.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -289,11 +292,11 @@ func (bq *BookmarkQuery) GroupBy(field string, fields ...string) *BookmarkGroupB
 //		Select(bookmark.FieldBookmarks).
 //		Scan(ctx, &v)
 func (bq *BookmarkQuery) Select(fields ...string) *BookmarkSelect {
-	bq.fields = append(bq.fields, fields...)
-	selbuild := &BookmarkSelect{BookmarkQuery: bq}
-	selbuild.label = bookmark.Label
-	selbuild.flds, selbuild.scan = &bq.fields, selbuild.Scan
-	return selbuild
+	bq.ctx.Fields = append(bq.ctx.Fields, fields...)
+	sbuild := &BookmarkSelect{BookmarkQuery: bq}
+	sbuild.label = bookmark.Label
+	sbuild.flds, sbuild.scan = &bq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a BookmarkSelect configured with the given aggregations.
@@ -302,7 +305,17 @@ func (bq *BookmarkQuery) Aggregate(fns ...AggregateFunc) *BookmarkSelect {
 }
 
 func (bq *BookmarkQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range bq.fields {
+	for _, inter := range bq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, bq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range bq.ctx.Fields {
 		if !bookmark.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -344,41 +357,22 @@ func (bq *BookmarkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Boo
 
 func (bq *BookmarkQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := bq.querySpec()
-	_spec.Node.Columns = bq.fields
-	if len(bq.fields) > 0 {
-		_spec.Unique = bq.unique != nil && *bq.unique
+	_spec.Node.Columns = bq.ctx.Fields
+	if len(bq.ctx.Fields) > 0 {
+		_spec.Unique = bq.ctx.Unique != nil && *bq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, bq.driver, _spec)
 }
 
-func (bq *BookmarkQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := bq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (bq *BookmarkQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   bookmark.Table,
-			Columns: bookmark.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: bookmark.FieldID,
-			},
-		},
-		From:   bq.sql,
-		Unique: true,
-	}
-	if unique := bq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(bookmark.Table, bookmark.Columns, sqlgraph.NewFieldSpec(bookmark.FieldID, field.TypeUUID))
+	_spec.From = bq.sql
+	if unique := bq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if bq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := bq.fields; len(fields) > 0 {
+	if fields := bq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, bookmark.FieldID)
 		for i := range fields {
@@ -394,10 +388,10 @@ func (bq *BookmarkQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := bq.limit; limit != nil {
+	if limit := bq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := bq.offset; offset != nil {
+	if offset := bq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := bq.order; len(ps) > 0 {
@@ -413,7 +407,7 @@ func (bq *BookmarkQuery) querySpec() *sqlgraph.QuerySpec {
 func (bq *BookmarkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(bq.driver.Dialect())
 	t1 := builder.Table(bookmark.Table)
-	columns := bq.fields
+	columns := bq.ctx.Fields
 	if len(columns) == 0 {
 		columns = bookmark.Columns
 	}
@@ -422,7 +416,7 @@ func (bq *BookmarkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = bq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if bq.unique != nil && *bq.unique {
+	if bq.ctx.Unique != nil && *bq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range bq.predicates {
@@ -431,12 +425,12 @@ func (bq *BookmarkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range bq.order {
 		p(selector)
 	}
-	if offset := bq.offset; offset != nil {
+	if offset := bq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := bq.limit; limit != nil {
+	if limit := bq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -444,13 +438,8 @@ func (bq *BookmarkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // BookmarkGroupBy is the group-by builder for Bookmark entities.
 type BookmarkGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *BookmarkQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -459,58 +448,46 @@ func (bgb *BookmarkGroupBy) Aggregate(fns ...AggregateFunc) *BookmarkGroupBy {
 	return bgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (bgb *BookmarkGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := bgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, bgb.build.ctx, "GroupBy")
+	if err := bgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	bgb.sql = query
-	return bgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*BookmarkQuery, *BookmarkGroupBy](ctx, bgb.build, bgb, bgb.build.inters, v)
 }
 
-func (bgb *BookmarkGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range bgb.fields {
-		if !bookmark.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (bgb *BookmarkGroupBy) sqlScan(ctx context.Context, root *BookmarkQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(bgb.fns))
+	for _, fn := range bgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := bgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*bgb.flds)+len(bgb.fns))
+		for _, f := range *bgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*bgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := bgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := bgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (bgb *BookmarkGroupBy) sqlQuery() *sql.Selector {
-	selector := bgb.sql.Select()
-	aggregation := make([]string, 0, len(bgb.fns))
-	for _, fn := range bgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
-		for _, f := range bgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(bgb.fields...)...)
-}
-
 // BookmarkSelect is the builder for selecting fields of Bookmark entities.
 type BookmarkSelect struct {
 	*BookmarkQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -521,26 +498,27 @@ func (bs *BookmarkSelect) Aggregate(fns ...AggregateFunc) *BookmarkSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (bs *BookmarkSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, bs.ctx, "Select")
 	if err := bs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	bs.sql = bs.BookmarkQuery.sqlQuery(ctx)
-	return bs.sqlScan(ctx, v)
+	return scanWithInterceptors[*BookmarkQuery, *BookmarkSelect](ctx, bs.BookmarkQuery, bs, bs.inters, v)
 }
 
-func (bs *BookmarkSelect) sqlScan(ctx context.Context, v any) error {
+func (bs *BookmarkSelect) sqlScan(ctx context.Context, root *BookmarkQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(bs.fns))
 	for _, fn := range bs.fns {
-		aggregation = append(aggregation, fn(bs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*bs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		bs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		bs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := bs.sql.Query()
+	query, args := selector.Query()
 	if err := bs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

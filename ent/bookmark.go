@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/mrusme/xbsapi/ent/bookmark"
@@ -26,7 +27,8 @@ type Bookmark struct {
 	// LastUpdated holds the value of the "lastUpdated" field.
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Deleted holds the value of the "deleted" field.
-	Deleted *time.Time `json:"deleted,omitempty"`
+	Deleted      *time.Time `json:"deleted,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -41,7 +43,7 @@ func (*Bookmark) scanValues(columns []string) ([]any, error) {
 		case bookmark.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Bookmark", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -92,16 +94,24 @@ func (b *Bookmark) assignValues(columns []string, values []any) error {
 				b.Deleted = new(time.Time)
 				*b.Deleted = value.Time
 			}
+		default:
+			b.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Bookmark.
+// This includes values selected through modifiers, order, etc.
+func (b *Bookmark) Value(name string) (ent.Value, error) {
+	return b.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Bookmark.
 // Note that you need to call Bookmark.Unwrap() before calling this method if this Bookmark
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (b *Bookmark) Update() *BookmarkUpdateOne {
-	return (&BookmarkClient{config: b.config}).UpdateOne(b)
+	return NewBookmarkClient(b.config).UpdateOne(b)
 }
 
 // Unwrap unwraps the Bookmark entity that was returned from a transaction after it was closed,
@@ -142,9 +152,3 @@ func (b *Bookmark) String() string {
 
 // Bookmarks is a parsable slice of Bookmark.
 type Bookmarks []*Bookmark
-
-func (b Bookmarks) config(cfg config) {
-	for _i := range b {
-		b[_i].config = cfg
-	}
-}

@@ -104,50 +104,8 @@ func (bc *BookmarkCreate) Mutation() *BookmarkMutation {
 
 // Save creates the Bookmark in the database.
 func (bc *BookmarkCreate) Save(ctx context.Context) (*Bookmark, error) {
-	var (
-		err  error
-		node *Bookmark
-	)
 	bc.defaults()
-	if len(bc.hooks) == 0 {
-		if err = bc.check(); err != nil {
-			return nil, err
-		}
-		node, err = bc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BookmarkMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = bc.check(); err != nil {
-				return nil, err
-			}
-			bc.mutation = mutation
-			if node, err = bc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(bc.hooks) - 1; i >= 0; i-- {
-			if bc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = bc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, bc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Bookmark)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from BookmarkMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks(ctx, bc.sqlSave, bc.mutation, bc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -215,6 +173,9 @@ func (bc *BookmarkCreate) check() error {
 }
 
 func (bc *BookmarkCreate) sqlSave(ctx context.Context) (*Bookmark, error) {
+	if err := bc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := bc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -229,19 +190,15 @@ func (bc *BookmarkCreate) sqlSave(ctx context.Context) (*Bookmark, error) {
 			return nil, err
 		}
 	}
+	bc.mutation.id = &_node.ID
+	bc.mutation.done = true
 	return _node, nil
 }
 
 func (bc *BookmarkCreate) createSpec() (*Bookmark, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Bookmark{config: bc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: bookmark.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: bookmark.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(bookmark.Table, sqlgraph.NewFieldSpec(bookmark.FieldID, field.TypeUUID))
 	)
 	if id, ok := bc.mutation.ID(); ok {
 		_node.ID = id
@@ -294,8 +251,8 @@ func (bcb *BookmarkCreateBulk) Save(ctx context.Context) ([]*Bookmark, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
 				} else {
