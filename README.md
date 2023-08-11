@@ -179,8 +179,16 @@ rcctl start xbsapi
 
 #### systemd
 
-TODO
+Copy the file `examples/systemd/xbsapi.service` to `/etc/systemd/system/`.
+Edit the file to make sure it uses the correct xbsapi user in your system
+and also the correct path for the executable `xbsapi` file.
 
+Enable and start the unit file with:
+
+```sh
+sudo systemctl enable xbsapi.service
+sudo systemctl start xbsapi.service
+```
 
 #### Docker
 
