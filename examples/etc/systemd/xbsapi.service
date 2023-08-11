@@ -1,0 +1,17 @@
+[Unit]
+Description=xbrowser api server (xbsapi - golang)
+
+[Service]
+Type=simple
+User=xbrowser
+Group=xbrowser
+ExecStart=/home/xbsuser/xbsapi
+Restart=always
+WorkingDirectory=/home/xbsuser/xbsapi
+
+#StandardOutput=syslog
+#StandardError=syslog
+SyslogIdentifier=xbsapi
+
+[Install]
+WantedBy=multi-user.target
