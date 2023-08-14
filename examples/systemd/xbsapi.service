@@ -1,0 +1,20 @@
+# Change the username and path of the installed xbsapi program
+# according to your setup.
+#
+[Unit]
+Description=xbrowsersync api server (xbsapi - golang)
+
+[Service]
+Type=simple
+User=xbsapiuser
+Group=xbsapiuser
+ExecStart=/home/xbsapiuser/xbsapi/xbsapi
+Restart=always
+WorkingDirectory=/home/xbsapiuser/xbsapi
+
+#StandardOutput=syslog
+#StandardError=syslog
+SyslogIdentifier=xbsapi
+
+[Install]
+WantedBy=multi-user.target
