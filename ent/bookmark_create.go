@@ -230,11 +230,15 @@ func (bc *BookmarkCreate) createSpec() (*Bookmark, *sqlgraph.CreateSpec) {
 // BookmarkCreateBulk is the builder for creating many Bookmark entities in bulk.
 type BookmarkCreateBulk struct {
 	config
+	err      error
 	builders []*BookmarkCreate
 }
 
 // Save creates the Bookmark entities in the database.
 func (bcb *BookmarkCreateBulk) Save(ctx context.Context) ([]*Bookmark, error) {
+	if bcb.err != nil {
+		return nil, bcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
 	nodes := make([]*Bookmark, len(bcb.builders))
 	mutators := make([]Mutator, len(bcb.builders))
