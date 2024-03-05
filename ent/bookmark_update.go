@@ -34,6 +34,14 @@ func (bu *BookmarkUpdate) SetBookmarks(s string) *BookmarkUpdate {
 	return bu
 }
 
+// SetNillableBookmarks sets the "bookmarks" field if the given value is not nil.
+func (bu *BookmarkUpdate) SetNillableBookmarks(s *string) *BookmarkUpdate {
+	if s != nil {
+		bu.SetBookmarks(*s)
+	}
+	return bu
+}
+
 // SetVersion sets the "version" field.
 func (bu *BookmarkUpdate) SetVersion(s string) *BookmarkUpdate {
 	bu.mutation.SetVersion(s)
@@ -192,6 +200,14 @@ type BookmarkUpdateOne struct {
 // SetBookmarks sets the "bookmarks" field.
 func (buo *BookmarkUpdateOne) SetBookmarks(s string) *BookmarkUpdateOne {
 	buo.mutation.SetBookmarks(s)
+	return buo
+}
+
+// SetNillableBookmarks sets the "bookmarks" field if the given value is not nil.
+func (buo *BookmarkUpdateOne) SetNillableBookmarks(s *string) *BookmarkUpdateOne {
+	if s != nil {
+		buo.SetBookmarks(*s)
+	}
 	return buo
 }
 
